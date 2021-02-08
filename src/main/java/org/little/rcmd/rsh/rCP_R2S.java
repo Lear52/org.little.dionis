@@ -13,14 +13,21 @@ public class rCP_R2S extends rCP_R2L{
        private static Logger logger = LoggerFactory.getLogger(rCP_R2S.class);
        
        //private String smtp;
-       
+      /* 
        public rCP_R2S(rShell sh,String name,int index,String _rfile,String _lfile) {
               super(sh,name,index,_rfile,"");
               //smtp=_lfile;
-       }
-
+       }*/
+       public rCP_R2S(String _host,String _user,String _passwd,String name,int index,String _rfile,String _lfile) {
+           super(_host,_user,_passwd,name,index,_rfile,"");
+           //smtp=_lfile;
+    }
+       
        @Override
        protected String r_command(){return "scp -f "+rfile; }
+
+       //@Override
+       //public String type() {return getClass().getName();}
 
        @Override
        protected boolean _run() {

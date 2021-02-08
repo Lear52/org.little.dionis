@@ -1,6 +1,7 @@
 package org.little.rcmd;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.util.ArrayList;
 
 import org.little.rcmd.rsh.rCMD;
@@ -9,7 +10,7 @@ import org.little.rcmd.rsh.rCP_L2R;
 import org.little.rcmd.rsh.rCP_R2L;
 import org.little.rcmd.rsh.rCP_R2S;
 import org.little.rcmd.rsh.rCP_R2H;
-import org.little.rcmd.rsh.rCommand;
+import org.little.rcmd.rsh.rRequest;
 import org.little.rcmd.rsh.rShell;
 import org.little.util.Logger;
 import org.little.util.LoggerFactory;
@@ -19,18 +20,16 @@ import org.w3c.dom.NodeList;
 public class rDionisCommand{
        private static Logger logger = LoggerFactory.getLogger(rDionisCommand.class);
 
-       private String              name;
-       private rShell              sh;
+       private String          name;
        private ArrayList<rCMD> list_rcommand;
 
 
-       public rDionisCommand(rShell sh,String name) {
+       public rDionisCommand(String name) {
               list_rcommand=new ArrayList<rCMD>();
-              this.sh=sh;
               this.name=name;
        }
  
-       public boolean run(BufferedInputStream bufin)  {
+       public boolean run(rShell sh,BufferedInputStream buf_input,BufferedOutputStream buf_output)  {
               logger.debug("begin run cmd:"+name);
 
               for(int i=0;i<list_rcommand.size();i++){
@@ -38,7 +37,7 @@ public class rDionisCommand{
                   if(cmd==null)continue;
                   boolean ret;
 
-                  ret=cmd.run(bufin);
+                  ret=cmd.run(sh,buf_input,buf_output);
 
                   if(ret==false) {
                      logger.trace("cmd:"+cmd.toString()+" ret:"+ret);
@@ -52,7 +51,6 @@ public class rDionisCommand{
           
 
         public boolean loadCFG(Node node_cfg) {
-               //logger.debug("begin cfg cmd:"+name);
 
                list_rcommand=new ArrayList<rCMD>();
                NodeList glist=node_cfg.getChildNodes();     
@@ -60,7 +58,7 @@ public class rDionisCommand{
                for(int i=0;i<glist.getLength();i++){
                    Node n=glist.item(i);
                    if("cmd".equals(n.getNodeName())){
-                      rCommand cmd=makeCmd(n,count++);
+                      rRequest cmd=makeCmd(n,count++);
                       if(cmd==null)continue;
                       list_rcommand.add(cmd);
                    }            
@@ -76,12 +74,11 @@ public class rDionisCommand{
                    }            
                }
 
-               //logger.debug("end cfg cmd:"+name+" size:"+list.size());
                return true;
         }
 
-        private rCommand makeCmd(Node node_cfg,int index) {
-               rCommand  cmd=null;
+        private rRequest makeCmd(Node node_cfg,int index) {
+               rRequest  cmd=null;
                if(node_cfg==null)return null;
 
                String request=null;
@@ -101,9 +98,8 @@ public class rDionisCommand{
                }
                if(request==null && response==null)return null;
 
-               cmd=new rCommand(sh,name,index,request,response); 
+               cmd=new rRequest(name,index,request,response); 
 
-               //logger.trace("make cmd:"+cmd.toString());
                return cmd;
         }
         
@@ -140,9 +136,12 @@ public class rDionisCommand{
                if(remote==null)return null;
                cmd=null;
 
-               if(local!=null)cmd=new rCP_R2L(sh,name,index,remote,local); 
-               if(smtp!=null)cmd=new rCP_R2S(sh,name,index,remote,smtp); 
-               if(http!=null)cmd=new rCP_R2H(sh,name,index,remote,http); 
+               //if(local!=null)cmd=new rCP_R2L(sh,name,index,remote,local); 
+               //if(smtp!=null)cmd=new rCP_R2S(sh,name,index,remote,smtp); 
+               //if(http!=null)cmd=new rCP_R2H(sh,name,index,remote,http); 
+               if(local!=null)cmd=new rCP_R2L("","","",name,index,remote,local); 
+               if(smtp!=null)cmd=new rCP_R2S("","","",name,index,remote,smtp); 
+               if(http!=null)cmd=new rCP_R2H("","","",name,index,remote,http); 
                return cmd;
         }
         private rCP makeL2R(Node node_cfg,int index) {
@@ -166,7 +165,8 @@ public class rDionisCommand{
                }
                if(remote==null && local==null)return null;
 
-               cmd=new rCP_L2R(sh,name,index,remote,local); 
+               //cmd=new rCP_L2R(sh,name,index,remote,local); 
+               cmd=new rCP_L2R("","","",name,index,remote,local); 
                return cmd;
         }
 

@@ -21,9 +21,10 @@ public class sequence{
                buffer=null;
                
        }
-       public boolean    put  (byte a) {
+       public boolean put(byte a) {
               if(buffer==null){clear();return false;}
               equal=false; 
+
               if(buffer[point]==a){
                  point++;
                  if(point==buffer.length){
@@ -43,8 +44,9 @@ public class sequence{
            byte [] b="234567812345612345667".getBytes();
            sequence s=new sequence("test","123");
            for(int i=0;i<b.length;i++) {
-           	if(s.put(b[i]))System.out.println(s.getName());
-           	
+           	if(s.put(b[i])){
+                   System.out.println(s.getName());
+           	}
            }
            
        }

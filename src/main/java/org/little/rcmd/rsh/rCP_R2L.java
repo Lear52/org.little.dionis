@@ -15,12 +15,20 @@ public class rCP_R2L extends rCP{
        public rCP_R2L(String rfile,String lfile) {
               super(rfile,lfile);
        }
+       /*
        public rCP_R2L(rShell sh,String name,int index,String _rfile,String _lfile) {
               super(sh,name,index,_rfile,_lfile);
        }
-
+       */
+       public rCP_R2L(String _host,String _user,String _passwd,String name,int index,String _rfile,String _lfile) {
+           super(_host,_user,_passwd,name,index,_rfile,_lfile);
+    }
+       
        @Override
        protected String r_command(){return "scp -f "+rfile; }
+
+       //@Override
+       //public String type() {return getClass().getName();}
 
        @Override
        protected boolean _run() {

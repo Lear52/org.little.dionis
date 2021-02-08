@@ -17,12 +17,15 @@ public class sequences{
        public void add(String name,String mask){
               list.add(new sequence(name,mask));
        }
-       public sequence   put(byte a) {
+       public synchronized sequence   put(byte a) {
               point=null;
               for(int i=0;i<list.size();i++){
-                  if(list.get(i).put(a))point=list.get(i);
+                  if(list.get(i).put(a)){
+                     point=list.get(i);
+                     return point;
+                  }
               }
-              return point;
+              return null;
        }
        public sequence check() {return point;}
 
@@ -35,7 +38,9 @@ public class sequences{
               s.add("test1","123");
               s.add("test2","561");
               for(int i=0;i<b.length;i++) {
-              	  if(s.put(b[i])!=null)System.out.println(s.getName());
+              	  if(s.put(b[i])!=null){
+                     System.out.println(s.getName());
+                  }
               }
            
        }
