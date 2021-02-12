@@ -25,8 +25,8 @@ public class rCP_L2R extends rCP{
               super(sh,name,index,_rfile,_lfile);
        }
        */
-       public rCP_L2R(String _host,String _user,String _passwd,String name,int index,String _rfile,String _lfile) {
-           super(_host,_user,_passwd,name,index,_rfile,_lfile);
+       public rCP_L2R(String name,int index,String _rfile,String _lfile) {
+           super(name,index,_rfile,_lfile);
        }
 
        @Override

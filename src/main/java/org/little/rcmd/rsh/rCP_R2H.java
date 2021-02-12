@@ -17,8 +17,8 @@ public class rCP_R2H extends rCP_R2L{
               //http=_lfile;
        }
 */       
-       public rCP_R2H(String _host,String _user,String _passwd,String name,int index,String _rfile,String _lfile) {
-           super(_host,_user,_passwd,name,index,_rfile,"");
+       public rCP_R2H(String name,int index,String _rfile,String _lfile) {
+           super(name,index,_rfile,"");
            //http=_lfile;
     }
 

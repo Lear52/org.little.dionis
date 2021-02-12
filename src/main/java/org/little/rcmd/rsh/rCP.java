@@ -1,7 +1,6 @@
 package org.little.rcmd.rsh;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -39,12 +38,12 @@ public class rCP extends rShell  implements rCMD {
               this.index=index;
        }
        */
-       protected rCP(String _host,String _user,String _passwd,String name,int index,String _rfile,String _lfile) {
+       protected rCP(String name,int index,String _rfile,String _lfile) {
            set(_rfile,_lfile);
 
-           setHost  (_host);
-           setUser  (_user);
-           setPasswd(_passwd);
+           setHost  ("");
+           setUser  ("");
+           setPasswd("");
 
            this.name=name;
            this.index=index;
@@ -52,6 +51,8 @@ public class rCP extends rShell  implements rCMD {
 
        @Override
        public String type() {return getClass().getName();}
+       @Override
+       public String [] print() {return str_null;}
        
        protected String r_command(){ return null; }
        @Override
@@ -94,7 +95,7 @@ public class rCP extends rShell  implements rCMD {
                return false;
        }
        @Override
-       public boolean run(rShell sh,BufferedInputStream bufin,BufferedOutputStream buf_output) {
+       public boolean run(rShell sh,BufferedInputStream bufin) {
               return run(sh);
               }
 

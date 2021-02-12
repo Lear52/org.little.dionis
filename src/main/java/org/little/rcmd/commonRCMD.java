@@ -2,12 +2,11 @@ package org.little.rcmd;
 
 import java.util.HashMap;
 
-import org.little.rcmd.rsh.rShell;
+import org.little.rcmd.rsh.rCommand;
 import org.little.util.Logger;
 import org.little.util.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList ;
-
 
 /**
  * 
@@ -19,21 +18,24 @@ public class commonRCMD{
        private String                         host;
        private String                         user;
        private String                         passwd;
-       private HashMap<String,rDionisCommand> command; 
+       private HashMap<String,rCommand> command; 
 
-       private static commonRCMD              cfg = new commonRCMD();
-       public  static commonRCMD              get(){ if(cfg==null)cfg=new commonRCMD();return cfg;};
+       //private static commonRCMD              cfg = new commonRCMD();
+       //public  static commonRCMD              get(){ if(cfg==null)cfg=new commonRCMD();return cfg;};
 
 
        public commonRCMD(){clear();}
+       public commonRCMD(commonRCMD _cmd){
+
+       }
 
        public void clear(){
-              command=new HashMap<String,rDionisCommand>(); 
+              command=new HashMap<String,rCommand>(); 
        }
        public String                         getHost()   {return host;   }
        public String                         getUser()   {return user;   }
        public String                         getPasswd() {return passwd; }
-       public HashMap<String,rDionisCommand> getCMD   () {return command;}
+       public HashMap<String,rCommand>       getCMD   () {return command;}
        
        public void init(Node node_cfg){
            if(node_cfg==null)return;
@@ -57,9 +59,9 @@ public class commonRCMD{
               if(node_cfg!=null){
                  NodeList glist=node_cfg.getChildNodes();     
                  for(int i=0;i<glist.getLength();i++){
-                     Node           n        =glist.item(i);
-                     String         name_node=n.getNodeName();
-                     rDionisCommand cmd      =new rDionisCommand(name_node);
+                     Node     n        =glist.item(i);
+                     String   name_node=n.getNodeName();
+                     rCommand cmd      =new rCommand(name_node);
                      if(cmd.loadCFG(n)!=false) command.put(name_node, cmd);
                  }
                  if(command.size()==0)command=null;

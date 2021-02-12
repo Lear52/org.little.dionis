@@ -1,7 +1,6 @@
 package org.little.rcmd.rsh;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 
 import org.little.util.Logger;
@@ -12,7 +11,8 @@ public class rRequest implements rCMD {
 
        private sequences seq;
        private String    request;
-       private String    response;
+       //private String    response;
+       private rResponse response;
        private int       index;
        private String    name;
 
@@ -25,19 +25,21 @@ public class rRequest implements rCMD {
 
        
        
-       public rRequest(String name,int index,String request,String response) {
+       public rRequest(String name,int index,String request,rResponse _response) {
 
               this.request=request;
-              this.response=response;
+              //this.response=response;
+              this.response=_response;
               this.name=name;
               this.index=index;
 
               seq=new sequences();
-              seq.add(response_ok          ,response);
-              seq.add(response_error       ,"Error:");
-              seq.add(response_syntax_error,"Syntax error:");
-              seq.add(response_info        ,"Info:");
-              seq.add(response_warn        ,"Warning:");
+
+              if(response!=null)seq.add(response_ok,response.getID(),response.getRes());
+              seq.add(response_error       ,"","Error:");
+              seq.add(response_syntax_error,"","Syntax error:");
+              seq.add(response_info        ,"","Info:");
+              seq.add(response_warn        ,"","Warning:");
 /*
 adm@DionisNX# show crypto disec conn
 [#!]NAME         ID    SRC             DST             SN         LOC   REM   A B
@@ -50,10 +52,8 @@ adm@DionisNX#
 
 
        }
-       @Override
-       public String type() {return getClass().getName();}
        
-       protected boolean sendRequest(rShell sh)  {
+       private boolean sendRequest(rShell sh)  {
               if(request==null){
                  logger.trace("request is null");
                  return true;
@@ -73,7 +73,7 @@ adm@DionisNX#
             
               return true;
        }
-       protected String getString(BufferedInputStream buf_input){
+       private String getString(BufferedInputStream buf_input){
               //System.out.println("begin get string");
               StringBuilder buf=new StringBuilder();
               int c;
@@ -91,12 +91,25 @@ adm@DionisNX#
             
               return buf.toString();
         }
- 
+
+        @Override
+        public String type() {return getClass().getName();}
+
+        @Override
+        public String[] print() {
+               if(response==null) return str_null;
+               return response.print();
+        }
+
+
+        @Override
         public boolean run(rShell sh)  {
             BufferedInputStream buf_input = new BufferedInputStream(sh.getIN());
-            return run(sh,buf_input,null);
+            return run(sh,buf_input);
         }
-        public boolean run(rShell sh,BufferedInputStream buf_input,BufferedOutputStream buf_output)  {
+
+        @Override
+        public boolean run(rShell sh,BufferedInputStream buf_input)  {
                StringBuilder str_out=new StringBuilder();
                sendRequest(sh);
                
@@ -108,66 +121,50 @@ adm@DionisNX#
                           byte _b=(byte)c;
 
                           rlog.print(_c);
-                          //System.out.print(_c);
                           str_out.append(_c);
-
-                          if(_c=='\r'||_c=='\n'){
-                             if(str_out.length()>0){
-                                //System.out.println("*> "+str_out.toString());
-                                if(buf_output!=null && str_out.length()>0) {
-                                   buf_output.write(str_out.toString().getBytes());
-                                   buf_output.flush();
-                                }
-                                str_out.setLength(0);
-                                str_out.trimToSize();
-                             }
-                          }
-
                           sequence s=seq.put(_b);
-
                           if(s==null)continue;
-                          //System.out.println("find:"+s.getName());
-                          //rlog.print("find response");
-                          if(response_ok.equals(s.getName())){
+
+                          if(response_ok.equals(s.getType())){
                              // received the expected response
-                             //String str=getString(buf_input); // get end string
-                             logger.trace("run  cmd:"+s.getName()+" Ok");
+                        	 response.getBuf().append(str_out);
+                             logger.trace("run  cmd:"+s.getType()+" id:"+s.getID()+" Ok");
                              return true;
                           }
                           else
-                          if(response_warn.equals(s.getName())){
+                          if(response_warn.equals(s.getType())){
                               // received warn response
                              String str=getString(buf_input);// get string to end
                              str_out.setLength(0);
                              str_out.trimToSize();
-                             logger.trace("run:"+toString()+" for:"+s.getName()+" ret:"+str);
+                             logger.trace("run:"+toString()+" for:"+s.getType()+" ret:"+str);
                              continue;
                           }
                           else
-                          if(response_info.equals(s.getName())){
+                          if(response_info.equals(s.getType())){
                              // received info response
                              String str=getString(buf_input);// get string to end
                              str_out.setLength(0);
                              str_out.trimToSize();
-                             logger.trace("run:"+toString()+" for:"+s.getName()+" ret:"+str);
+                             logger.trace("run:"+toString()+" for:"+s.getType()+" ret:"+str);
                              continue;
                           }
                           else
-                          if(response_error.equals(s.getName())){
+                          if(response_error.equals(s.getType())){
                              // received error response
                              String str=getString(buf_input);// get string to end
                              str_out.setLength(0);
                              str_out.trimToSize();
-                             logger.trace("run:"+toString()+" for:"+s.getName()+" ret:"+str);
+                             logger.trace("run:"+toString()+" for:"+s.getType()+" ret:"+str);
                              continue;
                           }
                           else
-                          if(response_syntax_error.equals(s.getName())){
+                          if(response_syntax_error.equals(s.getType())){
                              // received syntax error response
                              String str=getString(buf_input);// get string to end
                              str_out.setLength(0);
                              str_out.trimToSize();
-                             logger.trace("run:"+toString()+" for:"+s.getName()+" ret:"+str);
+                             logger.trace("run:"+toString()+" for:"+s.getType()+" ret:"+str);
                              continue;
                           }
                           /*
@@ -199,8 +196,8 @@ adm@DionisNX#
             boolean ret;
             rShell sh=new rShell();
             
-            rRequest cmd0=new rRequest("",1,null,"#");
-            rRequest cmd1=new rRequest("",2,"configure terminal","(config)#");
+            rRequest cmd0=new rRequest("",1,null,new rResponse("01","#"));
+            rRequest cmd1=new rRequest("",2,"configure terminal",new rResponse("02","(config)#"));
             rRequest cmd2=new rRequest("",3,"exit",null);
                
             if(arg.length>0)sh.setHost(arg[0]);
@@ -218,11 +215,11 @@ adm@DionisNX#
             BufferedInputStream buf_input = new BufferedInputStream(sh.getIN());
 
             System.out.println("----------------"); 
-            ret=cmd0.run(sh,buf_input,null);            
+            ret=cmd0.run(sh,buf_input);            
             System.out.println("----------------"+ret); 
-            ret=cmd1.run(sh,buf_input,null);            
+            ret=cmd1.run(sh,buf_input);            
             System.out.println("----------------"+ret); 
-            ret=cmd2.run(sh,buf_input,null);            
+            ret=cmd2.run(sh,buf_input);            
             System.out.println("----------------"+ret); 
 
             sh.close();

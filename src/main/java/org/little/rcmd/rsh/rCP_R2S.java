@@ -18,8 +18,8 @@ public class rCP_R2S extends rCP_R2L{
               super(sh,name,index,_rfile,"");
               //smtp=_lfile;
        }*/
-       public rCP_R2S(String _host,String _user,String _passwd,String name,int index,String _rfile,String _lfile) {
-           super(_host,_user,_passwd,name,index,_rfile,"");
+       public rCP_R2S(String name,int index,String _rfile,String _lfile) {
+           super(name,index,_rfile,"");
            //smtp=_lfile;
     }
        
